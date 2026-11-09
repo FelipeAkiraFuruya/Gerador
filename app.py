@@ -30,8 +30,8 @@ def get_secret(name, default=None):
         return os.getenv(name, default)
 
 
-api_key = get_secret("key_Blt0IvBeKyKdMnY1") or os.getenv("OPENAI_API_KEY")
-app_password = get_secret("maple2026") or os.getenv("APP_PASSWORD")
+api_key = get_secret("key_Blt0IvBeKyKdMnY1") or os.getenv("key_Blt0IvBeKyKdMnY1")
+app_password = get_secret("maple2026") or os.getenv("maple2026")
 
 if not api_key:
     st.error(
