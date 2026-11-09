@@ -1,3 +1,5 @@
+
+
 import streamlit as st
 from openai import OpenAI
 import os
@@ -183,7 +185,8 @@ def gerar_comentario(
     disciplina,
     pontos_fortes,
     pontos_a_aprimorar,
-    sugestoes
+    sugestoes,
+    observacoes_professor
 ):
 
     system_instruction = """
@@ -243,7 +246,22 @@ REGRAS OBRIGATÓRIAS:
 
 16. NÃO mencione inteligência artificial, ChatGPT ou OpenAI.
 
-17. O resultado final deve ser apenas o comentário.
+17. As observações adicionais escritas pelo professor são
+    informações prioritárias para personalizar o comentário.
+
+18. Incorpore as observações do professor naturalmente ao texto,
+    sem simplesmente copiá-las literalmente.
+
+19. NÃO ignore nenhuma observação relevante do professor.
+
+20. Caso existam observações adicionais, utilize-as para enriquecer
+    o comentário e torná-lo mais individualizado.
+
+21. Não acrescente informações que não estejam presentes nos
+    critérios selecionados ou nas observações do professor.
+
+22. Se houver poucas informações disponíveis, escreva um comentário
+    coerente sem inventar detalhes para preencher o texto.
 """
 
 
@@ -269,6 +287,12 @@ REGRAS OBRIGATÓRIAS:
         else "Nenhuma sugestão específica foi selecionada."
     )
 
+    observacoes_texto = (
+        observacoes_professor.strip()
+        if observacoes_professor.strip()
+        else "Nenhuma observação adicional foi fornecida."
+    )
+
 
     user_instruction = f"""
 Aluno: {nome_aluno}
@@ -283,6 +307,9 @@ Critérios que podem ser aprimorados:
 
 Sugestões de desenvolvimento:
 {sugestoes_texto}
+
+Observações adicionais do professor:
+{observacoes_texto}
 
 Com base exclusivamente nessas informações, escreva o comentário
 final do Report Card seguindo rigorosamente todas as instruções.
@@ -311,7 +338,7 @@ final do Report Card seguindo rigorosamente todas as instruções.
 st.title("🐻 Gerador de Report Card - Maple Bear")
 
 st.caption(
-    "Versão 3.0 • High School & Middle Years"
+    "Versão 3.1 • High School & Middle Years"
 )
 
 
@@ -342,7 +369,7 @@ with st.sidebar:
 
     st.caption(
         "O comentário é gerado automaticamente com base "
-        "nos critérios selecionados."
+        "nos critérios selecionados e nas observações do professor."
     )
 
 
@@ -423,6 +450,32 @@ for i, (crit, sugs) in enumerate(
 
 
 # ============================================================
+# OBSERVAÇÕES ADICIONAIS DO PROFESSOR
+# ============================================================
+
+st.subheader("📝 Observações adicionais do professor")
+
+st.caption(
+    "Utilize este espaço para acrescentar informações específicas "
+    "sobre o desempenho, a evolução ou as particularidades do aluno."
+)
+
+observacoes_professor = st.text_area(
+    "Comentário do professor:",
+    placeholder=(
+        "Ex.: O aluno apresentou uma evolução significativa "
+        "neste trimestre, especialmente durante as atividades "
+        "de resolução de problemas..."
+    ),
+    height=130,
+    help=(
+        "Campo opcional. A IA utilizará essas informações para "
+        "personalizar ainda mais o comentário final."
+    )
+)
+
+
+# ============================================================
 # BOTÃO
 # ============================================================
 
@@ -455,11 +508,11 @@ if gerar:
             "🔒 Senha incorreta."
         )
 
-    elif not selecoes_pf and not selecoes_nm:
+    elif not selecoes_pf and not selecoes_nm and not observacoes_professor.strip():
 
         st.warning(
-            "⚠️ Selecione pelo menos um critério como "
-            "'Ponto Forte' ou 'A aperfeiçoar'."
+            "⚠️ Selecione pelo menos um critério ou "
+            "acrescente uma observação do professor."
         )
 
     else:
@@ -479,7 +532,8 @@ if gerar:
                     disciplina=disc_selecionada,
                     pontos_fortes=selecoes_pf,
                     pontos_a_aprimorar=selecoes_nm,
-                    sugestoes=sugestoes_finais
+                    sugestoes=sugestoes_finais,
+                    observacoes_professor=observacoes_professor
                 )
 
 
@@ -504,7 +558,8 @@ if gerar:
                 st.text_area(
                     "Comentário para copiar:",
                     value=texto,
-                    height=180
+                    height=180,
+                    key="comentario_gerado"
                 )
 
 
@@ -602,7 +657,8 @@ if (
     st.text_area(
         "Comentário para copiar:",
         value=st.session_state["ultimo_comentario"],
-        height=180
+        height=180,
+        key="ultimo_comentario_copiar"
     )
 
 
@@ -613,5 +669,5 @@ if (
 st.divider()
 
 st.caption(
-    "🐻 Gerador de Report Card • Maple Bear • Versão 3.0"
+    "🐻 Gerador de Report Card • Maple Bear • Versão 3.1"
 )
