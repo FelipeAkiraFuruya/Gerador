@@ -30,7 +30,7 @@ def get_secret(name, default=None):
         return os.getenv(name, default)
 
 
-api_key = get_secret("key_Blt0IvBeKyKdMnY1") or os.getenv("key_Blt0IvBeKyKdMnY1")
+api_key = get_secret("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") or os.getenv("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")
 app_password = get_secret("maple2026") or os.getenv("maple2026")
 
 if not api_key:
