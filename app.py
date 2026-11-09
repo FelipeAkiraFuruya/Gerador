@@ -1,5 +1,4 @@
 
-
 import streamlit as st
 from openai import OpenAI
 import os
@@ -177,6 +176,103 @@ DADOS_DISCIPLINAS = {
 
 
 # ============================================================
+# INSTRUÇÕES DA IA
+# ============================================================
+
+SYSTEM_INSTRUCTION = """
+Você é um professor experiente da Maple Bear, responsável pela
+elaboração de comentários de Report Card.
+
+Sua tarefa é produzir comentários individualizados, naturais,
+profissionais, acolhedores e pedagogicamente precisos.
+
+PRIORIDADE DAS INFORMAÇÕES:
+
+1. As observações adicionais escritas pelo professor são
+   OBRIGATÓRIAS e devem ser consideradas prioritárias.
+
+2. TODAS as informações relevantes presentes nas observações
+   do professor devem aparecer no comentário final.
+
+3. É PROIBIDO ignorar, omitir ou eliminar informações
+   comportamentais, acadêmicas ou sociais mencionadas pelo professor.
+
+4. Os critérios selecionados devem complementar as observações,
+   nunca substituí-las.
+
+5. Se o professor mencionar dificuldades de comportamento,
+   como conversas excessivas, falta de respeito, atitudes rudes,
+   dificuldade de concentração, interrupções ou falta de
+   comprometimento, essas questões DEVEM aparecer explicitamente
+   no comentário final.
+
+6. Não transforme uma dificuldade comportamental em uma
+   recomendação genérica que esconda o problema.
+
+7. Preserve o significado e a importância das observações,
+   utilizando linguagem profissional, respeitosa e construtiva.
+
+8. Exemplo:
+   Observação: "O aluno conversa demais durante as explicações."
+
+   Forma adequada:
+   "Precisa desenvolver maior autorregulação durante as aulas,
+   evitando conversas paralelas que possam comprometer sua
+   concentração e os momentos de aprendizagem."
+
+9. Exemplo:
+   Observação: "O aluno foi rude com colegas."
+
+   Forma adequada:
+   "Precisa desenvolver uma comunicação mais respeitosa
+   nas interações com os colegas, demonstrando maior
+   consideração pelas pessoas ao seu redor."
+
+REGRAS DE REDAÇÃO:
+
+10. Escreva somente um único parágrafo.
+
+11. Não utilize listas, tópicos, títulos ou marcadores.
+
+12. O texto deve parecer escrito por um professor que conhece
+    o aluno.
+
+13. Utilize predominantemente o passado para descrever
+    desempenhos já demonstrados.
+
+14. Utilize o presente para recomendações e aspectos
+    que precisam ser desenvolvidos.
+
+15. Comece destacando aspectos positivos quando houver
+    pontos fortes selecionados.
+
+16. Apresente as dificuldades de maneira construtiva,
+    mas sem esconder sua natureza ou importância.
+
+17. Não repita o nome do aluno desnecessariamente.
+
+18. Não invente comportamentos, notas, projetos ou
+    características que não foram fornecidos.
+
+19. Varie a construção das frases para evitar comentários
+    excessivamente semelhantes.
+
+20. O comentário deve ter aproximadamente 100 a 150 palavras.
+    Se houver muitas observações relevantes, poderá ultrapassar
+    esse limite para não omitir informações importantes.
+
+21. Não copie mecanicamente as observações do professor.
+    Transforme-as em uma redação natural, preservando
+    integralmente seu significado.
+
+22. Não mencione inteligência artificial, ChatGPT ou OpenAI.
+
+23. O resultado final deve conter apenas o comentário,
+    sem explicações adicionais.
+"""
+
+
+# ============================================================
 # FUNÇÃO PARA GERAR O COMENTÁRIO
 # ============================================================
 
@@ -188,82 +284,6 @@ def gerar_comentario(
     sugestoes,
     observacoes_professor
 ):
-
-    system_instruction = """
-Você é um professor experiente da Maple Bear, responsável pela
-elaboração de comentários de Report Card para estudantes.
-
-Sua tarefa é escrever um comentário individualizado, natural,
-profissional, acolhedor e pedagogicamente útil.
-
-REGRAS OBRIGATÓRIAS:
-
-1. Escreva SOMENTE um único parágrafo.
-
-2. NÃO utilize listas, tópicos, títulos ou marcadores.
-
-3. O comentário deve parecer escrito por um professor que conhece
-   o aluno, e não por uma inteligência artificial.
-
-4. Ao falar sobre o desempenho que o aluno já demonstrou,
-   utilize predominantemente o PASSADO:
-   "demonstrou", "evidenciou", "apresentou", "desenvolveu",
-   "mostrou", "foi capaz de", etc.
-
-5. Ao apresentar recomendações para o futuro, utilize o PRESENTE:
-   "Sugiro que...", "Recomendo que...", "É importante que...",
-   "Pode continuar desenvolvendo...", etc.
-
-6. NÃO repita o nome do aluno no início de todas as frases.
-
-7. Comece destacando aspectos positivos quando houver pontos fortes.
-
-8. As dificuldades devem ser apresentadas de maneira construtiva,
-   sem utilizar linguagem negativa, punitiva ou desmotivadora.
-
-9. As recomendações devem estar diretamente relacionadas aos
-   critérios que precisam ser aprimorados.
-
-10. NÃO invente comportamentos, notas, projetos, atividades ou
-    características que não foram fornecidos.
-
-11. Evite frases genéricas como:
-    "O aluno teve um bom desempenho."
-    "Continue assim."
-    "Precisa melhorar."
-    "Parabéns pelo esforço."
-
-12. Varie a estrutura das frases para evitar que diferentes
-    comentários fiquem excessivamente semelhantes.
-
-13. O texto deve ter aproximadamente 80 a 130 palavras.
-
-14. O tom deve ser semelhante ao de um professor escrevendo
-    diretamente para um Report Card escolar internacional.
-
-15. NÃO mencione que você recebeu informações, critérios,
-    sugestões ou instruções para escrever o comentário.
-
-16. NÃO mencione inteligência artificial, ChatGPT ou OpenAI.
-
-17. As observações adicionais escritas pelo professor são
-    informações prioritárias para personalizar o comentário.
-
-18. Incorpore as observações do professor naturalmente ao texto,
-    sem simplesmente copiá-las literalmente.
-
-19. NÃO ignore nenhuma observação relevante do professor.
-
-20. Caso existam observações adicionais, utilize-as para enriquecer
-    o comentário e torná-lo mais individualizado.
-
-21. Não acrescente informações que não estejam presentes nos
-    critérios selecionados ou nas observações do professor.
-
-22. Se houver poucas informações disponíveis, escreva um comentário
-    coerente sem inventar detalhes para preencher o texto.
-"""
-
 
     # --------------------------------------------------------
     # ORGANIZAÇÃO DOS DADOS
@@ -294,25 +314,46 @@ REGRAS OBRIGATÓRIAS:
     )
 
 
+    # --------------------------------------------------------
+    # INSTRUÇÕES DO USUÁRIO
+    # --------------------------------------------------------
+
     user_instruction = f"""
 Aluno: {nome_aluno}
 
 Disciplina: {disciplina}
 
-Critérios nos quais apresentou pontos fortes:
+PONTOS FORTES IDENTIFICADOS:
 {pontos_fortes_texto}
 
-Critérios que podem ser aprimorados:
+ASPECTOS ACADÊMICOS A APRIMORAR:
 {pontos_aprimorar_texto}
 
-Sugestões de desenvolvimento:
+SUGESTÕES DE DESENVOLVIMENTO:
 {sugestoes_texto}
 
-Observações adicionais do professor:
+OBSERVAÇÕES INDIVIDUAIS DO PROFESSOR:
 {observacoes_texto}
 
-Com base exclusivamente nessas informações, escreva o comentário
-final do Report Card seguindo rigorosamente todas as instruções.
+INSTRUÇÃO FUNDAMENTAL:
+
+Antes de escrever, identifique mentalmente todas as informações
+presentes nas observações individuais do professor.
+
+Certifique-se de que cada informação relevante esteja representada
+no comentário final.
+
+Não priorize a fluidez do texto em detrimento da fidelidade
+às observações.
+
+Se o professor mencionou três dificuldades diferentes,
+as três devem ser contempladas no comentário.
+
+Produza um único parágrafo de Report Card, integrando
+as informações acadêmicas e comportamentais de maneira natural.
+
+As observações do professor são informações factuais fornecidas
+pelo educador. Não as descarte nem as substitua por suposições.
 """
 
 
@@ -322,13 +363,18 @@ final do Report Card seguindo rigorosamente todas as instruções.
 
     resposta = client.responses.create(
         model="gpt-4o-mini",
-        instructions=system_instruction,
+        instructions=SYSTEM_INSTRUCTION,
         input=user_instruction,
-        temperature=0.6,
-        max_output_tokens=250
+        temperature=0.3,
+        max_output_tokens=400
     )
 
-    return resposta.output_text.strip()
+    texto = resposta.output_text.strip()
+
+    if not texto:
+        raise ValueError("A API retornou um comentário vazio.")
+
+    return texto
 
 
 # ============================================================
@@ -338,7 +384,7 @@ final do Report Card seguindo rigorosamente todas as instruções.
 st.title("🐻 Gerador de Report Card - Maple Bear")
 
 st.caption(
-    "Versão 3.1 • High School & Middle Years"
+    "Versão 3.2 • High School & Middle Years"
 )
 
 
@@ -385,6 +431,8 @@ sugestoes_finais = []
 # ============================================================
 # CRITÉRIOS
 # ============================================================
+
+st.subheader("📊 Avaliação dos critérios")
 
 col1, col2 = st.columns(2)
 
@@ -457,20 +505,22 @@ st.subheader("📝 Observações adicionais do professor")
 
 st.caption(
     "Utilize este espaço para acrescentar informações específicas "
-    "sobre o desempenho, a evolução ou as particularidades do aluno."
+    "sobre o desempenho, a evolução, o comportamento ou as "
+    "particularidades do aluno."
 )
 
 observacoes_professor = st.text_area(
     "Comentário do professor:",
     placeholder=(
         "Ex.: O aluno apresentou uma evolução significativa "
-        "neste trimestre, especialmente durante as atividades "
-        "de resolução de problemas..."
+        "neste trimestre, mas conversa excessivamente durante "
+        "as explicações e precisa desenvolver maior respeito "
+        "pelos momentos de aprendizagem dos colegas..."
     ),
-    height=130,
+    height=150,
     help=(
-        "Campo opcional. A IA utilizará essas informações para "
-        "personalizar ainda mais o comentário final."
+        "Campo opcional. As observações serão consideradas "
+        "prioritárias na elaboração do comentário final."
     )
 )
 
@@ -669,5 +719,6 @@ if (
 st.divider()
 
 st.caption(
-    "🐻 Gerador de Report Card • Maple Bear • Versão 3.1"
+    "🐻 Gerador de Report Card • Maple Bear • Versão 3.2"
 )
+
